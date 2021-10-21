@@ -2,7 +2,7 @@
 # Do not edit!
 
 {
-  version = "2021.10.2";
+  version = "2021.10.6";
   components = {
     "abode" = ps: with ps; [ abodepy ];
     "accuweather" = ps: with ps; [ accuweather ];
@@ -19,7 +19,7 @@
     "air_quality" = ps: with ps; [ ];
     "airly" = ps: with ps; [ airly ];
     "airnow" = ps: with ps; [ pyairnow ];
-    "airthings" = ps: with ps; [ ]; # missing inputs: airthings_cloud
+    "airthings" = ps: with ps; [ airthings-cloud ];
     "airtouch4" = ps: with ps; [ ]; # missing inputs: airtouch4pyapi
     "airvisual" = ps: with ps; [ pyairvisual ];
     "aladdin_connect" = ps: with ps; [ aladdin-connect ];
@@ -42,7 +42,7 @@
     "anel_pwrctrl" = ps: with ps; [ ]; # missing inputs: anel_pwrctrl-homeassistant
     "anthemav" = ps: with ps; [ ]; # missing inputs: anthemav
     "apache_kafka" = ps: with ps; [ aiokafka ];
-    "apcupsd" = ps: with ps; [ ]; # missing inputs: apcaccess
+    "apcupsd" = ps: with ps; [ apcaccess ];
     "api" = ps: with ps; [ aiohttp-cors ];
     "apns" = ps: with ps; [ ]; # missing inputs: apns2
     "apple_tv" = ps: with ps; [ pyatv ];
@@ -151,7 +151,7 @@
     "cover" = ps: with ps; [ ];
     "cppm_tracker" = ps: with ps; [ ]; # missing inputs: clearpasspy
     "cpuspeed" = ps: with ps; [ py-cpuinfo ];
-    "crownstone" = ps: with ps; [ aiohttp-cors pyserial pyudev ]; # missing inputs: crownstone-cloud crownstone-sse crownstone-uart
+    "crownstone" = ps: with ps; [ aiohttp-cors crownstone-cloud crownstone-sse crownstone-uart pyserial pyudev ];
     "cups" = ps: with ps; [ pycups ];
     "currencylayer" = ps: with ps; [ ];
     "daikin" = ps: with ps; [ pydaikin ];
@@ -859,7 +859,7 @@
     "tankerkoenig" = ps: with ps; [ pytankerkoenig ];
     "tapsaff" = ps: with ps; [ ]; # missing inputs: tapsaff
     "tasmota" = ps: with ps; [ aiohttp-cors hatasmota paho-mqtt ];
-    "tautulli" = ps: with ps; [ ]; # missing inputs: pytautulli
+    "tautulli" = ps: with ps; [ pytautulli ];
     "tcp" = ps: with ps; [ ];
     "ted5000" = ps: with ps; [ xmltodict ];
     "telegram" = ps: with ps; [ pysocks aiohttp-cors python-telegram-bot ];
