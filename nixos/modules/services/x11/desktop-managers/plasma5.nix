@@ -1,15 +1,18 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
-
   xcfg = config.services.xserver;
   cfg = xcfg.desktopManager.plasma5;
 
   libsForQt5 = pkgs.plasma5Packages;
   inherit (libsForQt5) kdeGear kdeFrameworks plasma5;
   inherit (pkgs) writeText;
+  inherit (lib)
+    getBin optionalString
+    mkRemovedOptionModule mkRenamedOptionModule
+    mkDefault mkIf mkMerge mkOption types;
+
+  ini = pkgs.formats.ini { };
 
   pulseaudio = config.hardware.pulseaudio;
   pactl = "${getBin pulseaudio.package}/bin/pactl";
@@ -33,23 +36,25 @@ let
     gtk-button-images=1
   '';
 
-  gtk3_settings = writeText "settings.ini" ''
-    [Settings]
-    gtk-font-name=Sans Serif Regular 10
-    gtk-theme-name=Breeze
-    gtk-icon-theme-name=breeze
-    gtk-fallback-icon-theme=hicolor
-    gtk-cursor-theme-name=breeze_cursors
-    gtk-toolbar-style=GTK_TOOLBAR_ICONS
-    gtk-menu-images=1
-    gtk-button-images=1
-  '';
+  gtk3_settings = ini.generate "settings.ini" {
+    Settings = {
+      gtk-font-name = "Sans Serif Regular 10";
+      gtk-theme-name = "Breeze";
+      gtk-icon-theme-name = "breeze";
+      gtk-fallback-icon-theme = "hicolor";
+      gtk-cursor-theme-name = "breeze_cursors";
+      gtk-toolbar-style = "GTK_TOOLBAR_ICONS";
+      gtk-menu-images = 1;
+      gtk-button-images = 1;
+    };
+  };
 
-  kcminputrc = writeText "kcminputrc" ''
-    [Mouse]
-    cursorTheme=breeze_cursors
-    cursorSize=0
-  '';
+  kcminputrc = ini.generate "kcminputrc" {
+    Mouse = {
+      cursorTheme = "breeze_cursors";
+      cursorSize = 0;
+    };
+  };
 
   activationScript = ''
     ${set_XDG_CONFIG_HOME}
@@ -116,20 +121,17 @@ let
       if ! [ -f "$kdeglobals" ]
       then
           kcminputrc="''${XDG_CONFIG_HOME}/kcminputrc"
-          if ! [ -f "$kcminputrc" ]
-          then
+          if ! [ -f "$kcminputrc" ]; then
               cat ${kcminputrc} >"$kcminputrc"
           fi
 
           gtkrc2="$HOME/.gtkrc-2.0"
-          if ! [ -f "$gtkrc2" ]
-          then
+          if ! [ -f "$gtkrc2" ]; then
               cat ${gtkrc2} >"$gtkrc2"
           fi
 
           gtk3_settings="''${XDG_CONFIG_HOME}/gtk-3.0/settings.ini"
-          if ! [ -f "$gtk3_settings" ]
-          then
+          if ! [ -f "$gtk3_settings" ]; then
               mkdir -p "$(dirname "$gtk3_settings")"
               cat ${gtk3_settings} >"$gtk3_settings"
           fi
@@ -140,46 +142,43 @@ let
 in
 
 {
-  options = {
+  options.services.xserver.desktopManager.plasma5 = {
+    enable = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable the Plasma 5 (KDE 5) desktop environment.";
+    };
 
-    services.xserver.desktopManager.plasma5 = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable the Plasma 5 (KDE 5) desktop environment.";
-      };
+    phononBackend = mkOption {
+      type = types.enum [ "gstreamer" "vlc" ];
+      default = "gstreamer";
+      example = "vlc";
+      description = "Phonon audio backend to install.";
+    };
 
-      phononBackend = mkOption {
-        type = types.enum [ "gstreamer" "vlc" ];
-        default = "gstreamer";
-        example = "vlc";
-        description = "Phonon audio backend to install.";
-      };
+    supportDDC = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Support setting monitor brightness via DDC.
+        </para>
+        <para>
+        This is not needed for controlling brightness of the internal monitor
+        of a laptop and as it is considered experimental by upstream, it is
+        disabled by default.
+      '';
+    };
 
-      supportDDC = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          Support setting monitor brightness via DDC.
-          </para>
-          <para>
-          This is not needed for controlling brightness of the internal monitor
-          of a laptop and as it is considered experimental by upstream, it is
-          disabled by default.
-        '';
-      };
+    useQtScaling = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable HiDPI scaling in Qt.";
+    };
 
-      useQtScaling = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable HiDPI scaling in Qt.";
-      };
-
-      runUsingSystemd = mkOption {
-        description = "Use systemd to manage the Plasma session";
-        type = types.bool;
-        default = false;
-      };
+    runUsingSystemd = mkOption {
+      description = "Use systemd to manage the Plasma session";
+      type = types.bool;
+      default = false;
     };
   };
 
@@ -204,22 +203,25 @@ in
 
       security.wrappers = {
         kcheckpass =
-          { setuid = true;
+          {
+            setuid = true;
             owner = "root";
             group = "root";
-            source = "${lib.getBin libsForQt5.kscreenlocker}/libexec/kcheckpass";
+            source = "${getBin libsForQt5.kscreenlocker}/libexec/kcheckpass";
           };
         start_kdeinit =
-          { setuid = true;
+          {
+            setuid = true;
             owner = "root";
             group = "root";
-            source = "${lib.getBin libsForQt5.kinit}/libexec/kf5/start_kdeinit";
+            source = "${getBin libsForQt5.kinit}/libexec/kf5/start_kdeinit";
           };
         kwin_wayland =
-          { owner = "root";
+          {
+            owner = "root";
             group = "root";
             capabilities = "cap_sys_nice+ep";
-            source = "${lib.getBin plasma5.kwin}/bin/kwin_wayland";
+            source = "${getBin plasma5.kwin}/bin/kwin_wayland";
           };
       };
 
