@@ -3,7 +3,7 @@
 
 mkDerivation rec {
   pname = "latte-dock";
-  version = "0.10.0";
+  version = "0.10.3";
 
   src = fetchurl {
     url = "https://download.kde.org/stable/${pname}/${pname}-${version}.tar.xz";
